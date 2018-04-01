@@ -12,6 +12,7 @@ $certThumbprint = (New-SelfSignedCertificate `
     -KeyExportPolicy Exportable `
     -Provider "Microsoft Enhanced RSA and AES Cryptographic Provider" `
     -NotAfter $notAfter).Thumbprint
+Write-Host "New certificate created with name: $($certName)"
 
 # Export password-protected pfx file
 $pfxPassword = Read-Host `
@@ -22,6 +23,7 @@ Export-PfxCertificate `
     -Cert "$($certStore)\$($certThumbprint)" `
     -FilePath $pfxFilepath `
     -Password $pfxPassword
+Write-Host "Certificate successfully exported to: $($pfxFilepath)"
 
 # Create Key Credential Object
 $cert = New-Object `
@@ -29,8 +31,7 @@ $cert = New-Object `
     -ArgumentList @($pfxFilepath, $pfxPassword)
 
 $keyValue = [System.Convert]::ToBase64String($cert.GetRawCertData())
-$keyId = [guid]::NewGuid()
-Import-Module AzureRM.Resources
+Write-Host "Key value successfully converted to base64"
 
 # Define Azure AD Application Properties
 $adAppName = Read-Host -Prompt "Enter unique Azure AD App name"
@@ -38,7 +39,9 @@ $adAppHomePage = Read-Host -Prompt "Enter unique Azure AD App Homepage URI"
 $adAppIdentifierUri = Read-Host -Prompt "Enter unique Azure AD App Identifier URI"
 
 # Login to Azure Account
+Import-Module AzureRM.Resources
 Login-AzureRmAccount
+Write-Host "Logged in to Azure account"
 
 # Create new Azure AD Application
 $adApp = New-AzureRmADApplication `
@@ -46,7 +49,7 @@ $adApp = New-AzureRmADApplication `
     -HomePage $adAppHomePage `
     -IdentifierUris $adAppIdentifierUri
 
-Write-Output "New Azure AD App Id: $($adApp.ApplicationId)"
+Write-Output "New Azure AD App created with Id: $($adApp.ApplicationId)"
 
 # Create Azure AD Service Principal
 New-AzureRmADServicePrincipal `
@@ -54,6 +57,7 @@ New-AzureRmADServicePrincipal `
     -CertValue $keyValue `
     -StartDate $currentDate `
     -EndDate $endDate
+Write-Host "Added service principal to AAD app"
 
 # Set Azure AD Tenant ID
 $tenantId = (Get-AzureRmContext).Tenant.TenantId
@@ -64,3 +68,4 @@ Login-AzureRmAccount `
     -TenantId $tenantId `
     -ApplicationId $adApp.ApplicationId `
     -CertificateThumbprint $certThumbprint
+Write-Host "Fuccessfully logged in as AAD app"
