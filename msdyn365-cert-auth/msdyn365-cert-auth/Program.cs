@@ -20,19 +20,37 @@ namespace msdyn365_cert_auth
             var myCertStore = new X509Store(StoreName.My, StoreLocation.CurrentUser);
             myCertStore.Open(OpenFlags.ReadOnly);
             var cert = myCertStore.Certificates.Find(X509FindType.FindByThumbprint, thumbPrint, false)[0];
+            myCertStore.Close();
 
-            // Authenticate with 
-            var client = new CrmServiceClient(
-                certificate: cert,
-                certificateStoreName: StoreName.My,
-                certificateThumbPrint: thumbPrint,
-                instanceUrl: crmUrl, 
-                useUniqueInstance: true, 
-                orgDetail: null, 
-                clientId: clientId, 
-                redirectUri: redirectUri, 
-                tokenCachePath: "c:\\cache");
-
+            CrmServiceClient client;
+            if (cert == null)
+            {
+                // Authenticate with physical certificate
+                client = new CrmServiceClient(
+                    certificate: cert,
+                    certificateStoreName: new StoreName(), // any value will do
+                    certificateThumbPrint: null,
+                    instanceUrl: crmUrl,
+                    useUniqueInstance: true,
+                    orgDetail: null,
+                    clientId: clientId,
+                    redirectUri: redirectUri,
+                    tokenCachePath: "c:\\cache");
+            }
+            else
+            {
+                // Authenticate with store certificate
+                client = new CrmServiceClient(
+                    certificate: null,
+                    certificateStoreName: StoreName.My,
+                    certificateThumbPrint: thumbPrint,
+                    instanceUrl: crmUrl,
+                    useUniqueInstance: true,
+                    orgDetail: null,
+                    clientId: clientId,
+                    redirectUri: redirectUri,
+                    tokenCachePath: "c:\\cache");
+            }
 
             var result = client.Execute(new WhoAmIRequest());
         }
