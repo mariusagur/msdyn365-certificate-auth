@@ -47,7 +47,8 @@ Write-Host "Logged in to Azure account"
 $adApp = New-AzureRmADApplication `
     -DisplayName $adAppName `
     -HomePage $adAppHomePage `
-    -IdentifierUris $adAppIdentifierUri
+    -IdentifierUris $adAppIdentifierUri `
+	-ReplyUrls $adAppHomePage
 
 Write-Output "New Azure AD App created with Id: $($adApp.ApplicationId)"
 

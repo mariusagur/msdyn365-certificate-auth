@@ -32,8 +32,46 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.Crm.Sdk.Proxy, Version=9.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.CrmSdk.CoreAssemblies.9.0.0.5\lib\net452\Microsoft.Crm.Sdk.Proxy.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.IdentityModel.Clients.ActiveDirectory, Version=2.22.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.IdentityModel.Clients.ActiveDirectory.2.22.302111727\lib\net45\Microsoft.IdentityModel.Clients.ActiveDirectory.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.IdentityModel.Clients.ActiveDirectory.WindowsForms, Version=2.22.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.IdentityModel.Clients.ActiveDirectory.2.22.302111727\lib\net45\Microsoft.IdentityModel.Clients.ActiveDirectory.WindowsForms.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Xrm.Sdk, Version=9.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.CrmSdk.CoreAssemblies.9.0.0.5\lib\net452\Microsoft.Xrm.Sdk.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Xrm.Sdk.Deployment, Version=9.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.CrmSdk.Deployment.9.0.0.5\lib\net452\Microsoft.Xrm.Sdk.Deployment.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Xrm.Sdk.Workflow, Version=9.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.CrmSdk.Workflow.9.0.0.5\lib\net452\Microsoft.Xrm.Sdk.Workflow.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Xrm.Tooling.Connector, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.CrmSdk.XrmTooling.CoreAssembly.9.0.0.7\lib\net452\Microsoft.Xrm.Tooling.Connector.dll</HintPath>
+    </Reference>
+    <Reference Include="PresentationFramework" />
     <Reference Include="System" />
+    <Reference Include="System.Activities" />
+    <Reference Include="System.Activities.Presentation" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
+    <Reference Include="System.DirectoryServices" />
+    <Reference Include="System.DirectoryServices.AccountManagement" />
+    <Reference Include="System.IdentityModel" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Security" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.ServiceModel.Web" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Web.Services" />
+    <Reference Include="System.Workflow.Activities" />
+    <Reference Include="System.Workflow.ComponentModel" />
+    <Reference Include="System.Workflow.Runtime" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -47,7 +85,23 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="packages.config" />
     <None Include="tools\SelfSignedCertAndApplicationKey.ps1" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Helpers\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <UsingTask TaskName="TransformXml" AssemblyFile="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v10.0\Web\Microsoft.Web.Publishing.Tasks.dll" />
+  <Target Name="AfterCompile" Condition="exists('app.$(Configuration).config')">
+    <!-- Generate transformed app config in the intermediate directory -->
+    <TransformXml Source="app.config" Destination="$(IntermediateOutputPath)$(TargetFileName).config" Transform="app.$(Configuration).config" />
+    <!-- Force build process to use the transformed configuration file from now on. -->
+    <ItemGroup>
+      <AppConfigWithTargetPath Remove="app.config" />
+      <AppConfigWithTargetPath Include="$(IntermediateOutputPath)$(TargetFileName).config">
+        <TargetPath>$(TargetFileName).config</TargetPath>
+      </AppConfigWithTargetPath>
+    </ItemGroup>
+  </Target>
 </Project>
